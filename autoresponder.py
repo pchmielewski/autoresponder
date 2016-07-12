@@ -17,7 +17,6 @@ def log(msg):
         with open('/var/log/responder.log', 'a+') as f:
            f.write('{} {}\n'.format(str(datetime.datetime.today()), msg))
 
-
 try:
         log('BEGIN')
         msg = ''
