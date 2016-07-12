@@ -1,9 +1,10 @@
-import email, email.parser, email.utils
+import email
+import email.parser
+import email.utils
 import sys
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-import _mysql
 import MySQLdb
 import re
 import datetime
