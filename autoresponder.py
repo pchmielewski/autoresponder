@@ -83,7 +83,7 @@ def main():
             sys.exit(0)
         except Exception as e:
             logging.debug(e)
-                sys.exit(0)
+            sys.exit(0)
 
 
 if __name__ == '__main__':
