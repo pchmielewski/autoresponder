@@ -24,7 +24,7 @@ def main():
     try:
         FORMAT = "%(asctime)-15s [%(levelname)-10s][%(process)s] %(message)s"
         logging.basicConfig(filename=DEFAULTS['logfile'], level=allowed_log_levels[DEFAULTS['loglevel']], format=FORMAT)
-        logging.debug('BEGIN')
+        logging.debug('Start processing...')
         parser = email.parser.HeaderParser()
         headers = parser.parse(sys.stdin)
         from_addr = email.utils.parseaddr(headers.get('From'))
@@ -32,22 +32,20 @@ def main():
         xloop = email.utils.parseaddr(headers.get('X-loop'))
         logging.debug(headers.items())
         if xloop[1] == to_addr[1]:
-            logging.debug('X-loop detected')
-            logging.debug('END')
+            logging.debug('X-loop detected. Exiting')
             sys.exit(0)
         if 'MAILER-DAEMON'.lower() in from_addr[1].lower():
-            logging.debug('MAILER-DAEMON detected')
-            logging.debug('END')
+            logging.debug('MAILER-DAEMON detected. Exiting.')
             sys.exit(0)
         if ('Auto-submitted' or 'auto-replied' or 'auto-notified') in headers:
-            logging.debug('Autoreply detected')
+            logging.debug('Autoreply detected. Exiting.')
             sys.exit(0)
 
         try:
             db = MySQLdb.connect(host="localhost", user=DEFAULTS['dbuser'], passwd=DEFAULTS['dbpassword'],
                                  db=DEFAULTS['db'], use_unicode=True, charset="utf8")
         except Exception as e:
-            logging.exception('END')
+            logging.exception('MySQL connection failure. Exiting.')
             sys.exit(0)
         c = db.cursor()
         query = 'SELECT message FROM postfix_autoresponder WHERE email="{}" AND `from`<=NOW() AND `to`>=NOW()'.format(
@@ -56,8 +54,7 @@ def main():
         logging.debug(query)
         row = c.fetchone()
         if row is None:
-            logging.debug('Autoresponder not found')
-            logging.debug('END')
+            logging.debug('Autoresponder not found. Exiting.')
             sys.exit(0)
 
         msg = MIMEMultipart('alternative')
@@ -80,7 +77,7 @@ def main():
         s.sendmail(to_addr[1], from_addr[1], msg.as_string())
         s.quit()
         logging.debug('SENT to {}'.format(from_addr[1]))
-        logging.debug('END')
+        logging.debug('Exiting.')
         sys.exit(0)
     except Exception as e:
         logging.exception('main() failure')
